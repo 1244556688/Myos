@@ -1,31 +1,33 @@
-name: Build Debian YourOS ISO
+name: Build Debian Live ISO
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install dependencies
+      - name: Install required packages
         run: |
           sudo apt update
-          sudo apt install -y live-build debootstrap debian-archive-keyring squashfs-tools xorriso ca-certificates
-
-      - name: Clean old build files
-        run: |
-          rm -rf live-build/cache
-          rm -rf live-build/chroot
+          sudo apt install -y live-build debootstrap cdebootstrap wget xorriso isolinux syslinux-utils squashfs-tools
 
       - name: Configure live-build
         run: |
+          mkdir -p live-build
           cd live-build
+          
+          # 清理舊配置
+          sudo lb clean
+
+          # 設定 live-build
           sudo lb config \
             --distribution bookworm \
             --binary-images iso-hybrid \
@@ -33,17 +35,17 @@ jobs:
             --mirror-bootstrap https://deb.debian.org/debian/ \
             --mirror-chroot https://deb.debian.org/debian/ \
             --mirror-binary https://deb.debian.org/debian/ \
-            --mirror-binary-security https://security.debian.org/ \
+            --mirror-binary-security https://deb.debian.org/debian-security/ \
             --security true \
             --debian-installer false
 
-      - name: Build ISO
+      - name: Build the ISO
         run: |
           cd live-build
           sudo lb build
 
       - name: Upload ISO artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
-          name: YourOS-ISO
+          name: debian-live-iso
           path: live-build/*.iso
