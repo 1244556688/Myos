@@ -20,9 +20,8 @@ jobs:
 
       - name: Clean old build files
         run: |
-          rm -rf live-build/cache\
-          rm -rf live-build/chroot\
-          rm -rf live-build/config\
+          rm -rf live-build/cache
+          rm -rf live-build/chroot
 
       - name: Configure live-build
         run: |
