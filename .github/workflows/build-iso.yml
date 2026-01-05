@@ -1,0 +1,37 @@
+name: Build Linux ISO
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Install live-build
+      run: |
+        sudo apt update
+        sudo apt install -y live-build squashfs-tools xorriso
+
+    - name: Configure
+      run: |
+        cd live-build
+        lb config \
+          --distribution bookworm \
+          --binary-images iso-hybrid
+
+    - name: Build ISO
+      run: |
+        cd live-build
+        sudo lb build
+
+    - name: Upload ISO
+      uses: actions/upload-artifact@v4
+      with:
+        name: YourOS-ISO
+        path: live-build/*.iso
