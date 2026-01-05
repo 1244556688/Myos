@@ -1,4 +1,4 @@
-name: Build YourOS ISO
+name: Build Debian YourOS ISO
 
 on:
   push:
@@ -8,24 +8,23 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Install live-build
+      - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install -y live-build debootstrap squashfs-tools xorriso
+          sudo apt install -y live-build debootstrap debian-archive-keyring squashfs-tools xorriso ca-certificates
 
-      - name: Clean old cache
+      - name: Clean old build files
         run: |
-          sudo rm -rf live-build/cache
-          sudo rm -rf live-build/chroot
+          rm -rf live-build/cache
+          rm -rf live-build/chroot
+          rm -rf live-build/config
 
-      - name: Configure live-build (Debian bookworm)
+      - name: Configure live-build
         run: |
           cd live-build
           sudo lb config \
@@ -36,7 +35,8 @@ jobs:
             --mirror-chroot https://deb.debian.org/debian/ \
             --mirror-binary https://deb.debian.org/debian/ \
             --mirror-binary-security https://security.debian.org/ \
-            --security true
+            --security true \
+            --debian-installer false
 
       - name: Build ISO
         run: |
