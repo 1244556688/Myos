@@ -1,4 +1,4 @@
-name: Build Debian Linux ISO
+name: Build YourOS ISO
 
 on:
   push:
@@ -8,43 +8,43 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
-    - name: Checkout repo
-      uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
-    - name: Install dependencies
-      run: |
-        sudo apt update
-        sudo apt install -y \
-          live-build \
-          debootstrap \
-          debian-archive-keyring \
-          squashfs-tools \
-          xorriso \
-          ca-certificates
+      - name: Install live-build
+        run: |
+          sudo apt update
+          sudo apt install -y live-build debootstrap squashfs-tools xorriso
 
-    - name: Configure live-build
-      run: |
-        cd live-build
-        sudo lb config \
-          --distribution bookworm \
-          --binary-images iso-hybrid \
-          --archive-areas "main contrib non-free non-free-firmware" \
-          --mirror-bootstrap https://deb.debian.org/debian/ \
-          --mirror-binary https://deb.debian.org/debian/ \
-          --mirror-chroot https://deb.debian.org/debian/ \
-          --mirror-security https://security.debian.org/ \
-          --security true
+      - name: Clean old cache
+        run: |
+          sudo rm -rf live-build/cache
+          sudo rm -rf live-build/chroot
 
+      - name: Configure live-build (Debian bookworm)
+        run: |
+          cd live-build
+          sudo lb config \
+            --distribution bookworm \
+            --binary-images iso-hybrid \
+            --archive-areas "main contrib non-free non-free-firmware" \
+            --mirror-bootstrap https://deb.debian.org/debian/ \
+            --mirror-chroot https://deb.debian.org/debian/ \
+            --mirror-binary https://deb.debian.org/debian/ \
+            --mirror-binary-security https://security.debian.org/ \
+            --security true
 
-    - name: Build ISO
-      run: |
-        cd live-build
-        sudo lb build
+      - name: Build ISO
+        run: |
+          cd live-build
+          sudo lb build
 
-    - name: Upload ISO artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: YourOS-ISO
-        path: live-build/*.iso
+      - name: Upload ISO artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: YourOS-ISO
+          path: live-build/*.iso
