@@ -1,4 +1,4 @@
-name: Build Debian-based Linux ISO
+name: Build Debian Linux ISO
 
 on:
   push:
@@ -9,30 +9,25 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    # 關鍵：用 Debian bookworm 當 build 環境
-    container:
-      image: debian:bookworm
-
     steps:
-    - name: Install dependencies
-      run: |
-        apt update
-        apt install -y \
-          live-build \
-          debootstrap \
-          squashfs-tools \
-          xorriso \
-          git \
-          sudo \
-          ca-certificates
-
     - name: Checkout repo
       uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y \
+          live-build \
+          debootstrap \
+          debian-archive-keyring \
+          squashfs-tools \
+          xorriso \
+          ca-certificates
 
     - name: Configure live-build
       run: |
         cd live-build
-        lb config \
+        sudo lb config \
           --distribution bookworm \
           --binary-images iso-hybrid \
           --archive-areas "main contrib non-free non-free-firmware"
@@ -40,7 +35,7 @@ jobs:
     - name: Build ISO
       run: |
         cd live-build
-        lb build
+        sudo lb build
 
     - name: Upload ISO artifact
       uses: actions/upload-artifact@v4
