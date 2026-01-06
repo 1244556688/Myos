@@ -67,4 +67,4 @@ jobs:
         with:
           name: myos-build
           path: |
-            *.iso
+            output/*.iso
