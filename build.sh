@@ -4,6 +4,6 @@ set -e
 echo "=== MyOS build start ==="
 
 mkdir -p output
-echo "MyOS build test" > output/test.txt
+echo "fake iso" > output/myos.iso
 
 echo "=== Build finished ==="
