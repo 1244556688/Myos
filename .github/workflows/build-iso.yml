@@ -15,6 +15,13 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
 
+      - name: Debug workspace (IMPORTANT)
+        run: |
+          echo "PWD:"
+          pwd
+          echo "Files:"
+          find . -maxdepth 3 -type f
+
       - name: Fix APT sources (Debian Bookworm ONLY)
         run: |
           rm -f /etc/apt/sources.list
@@ -46,8 +53,14 @@ jobs:
 
       - name: Build OS
         run: |
-          chmod +x build.sh
-          ./build.sh
+          if [ -f build.sh ]; then
+            chmod +x build.sh
+            ./build.sh
+          else
+            echo "❌ build.sh not found!"
+            echo "👉 Please check file name or path above"
+            exit 1
+          fi
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
