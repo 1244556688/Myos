@@ -47,6 +47,7 @@ jobs:
             xorriso \
             squashfs-tools \
             debootstrap \
+            mtools \
             curl \
             wget \
             git
